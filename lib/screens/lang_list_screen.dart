@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/langs.dart';
 import 'lang_detail_screen.dart';
 
@@ -10,21 +11,22 @@ class LangListScreen extends StatefulWidget {
 }
 
 class _LangListScreenState extends State<LangListScreen> {
-  final Set<String> _favorites = {};
+  final Set<String> favorites = {};
 
-  Future<void> _openDetail(PLangs lang) async {
-    final added = await Navigator.push<bool>(
+  Future<void> openDetails(PLangs lang) async {
+    final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => LangDetailScreen(
           lang: lang,
-          isFavorite: _favorites.contains(lang.name),
+          isFavorite: favorites.contains(lang.name),
         ),
       ),
     );
-    if (added == true) {
+
+    if (result != null && mounted) {
       setState(() {
-        _favorites.add(lang.name);
+        favorites.add(lang.name);
       });
     }
   }
@@ -34,20 +36,72 @@ class _LangListScreenState extends State<LangListScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Programski i skriptni jezici')),
       body: ListView.builder(
+        padding: const EdgeInsets.all(12),
         itemCount: langs.length,
         itemBuilder: (context, index) {
           final lang = langs[index];
-          final isFavorite = _favorites.contains(lang.name);
-          return ListTile(
-            leading: Icon(lang.icon, color: Colors.teal),
-            title: Text(lang.name),
-            subtitle: Text(lang.type),
-            trailing: isFavorite
-                ? const Icon(Icons.star, color: Colors.teal)
-                : const Icon(Icons.chevron_right),
-            onTap: () => _openDetail(lang),
+          return LangTile(
+            lang: lang,
+            isFavorite: favorites.contains(lang.name),
+            onOpen: () => openDetails(lang),
           );
         },
+      ),
+    );
+  }
+}
+
+class LangTile extends StatelessWidget {
+  final PLangs lang;
+  final bool isFavorite;
+  final VoidCallback onOpen;
+
+  const LangTile({
+    super.key,
+    required this.lang,
+    required this.isFavorite,
+    required this.onOpen,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            lang.icon,
+            size: 32,
+            color: isFavorite ? Colors.red : Colors.grey,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  lang.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(lang.type),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onOpen,
+            icon: const Icon(Icons.chevron_right),
+          ),
+        ],
       ),
     );
   }
