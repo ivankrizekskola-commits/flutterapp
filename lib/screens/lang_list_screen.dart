@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/langs.dart';
+import 'favorites_screen.dart';
 import 'lang_detail_screen.dart';
 
 class LangListScreen extends StatefulWidget {
@@ -32,7 +33,21 @@ class _LangListScreenState extends State<LangListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Programski i skriptni jezici')),
+      appBar: AppBar(
+        title: const Text('Programski i skriptni jezici'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.star),
+            tooltip: 'Favoriti',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FavoritesScreen(favorites: _favorites),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: ListView.builder(
         itemCount: langs.length,
         itemBuilder: (context, index) {
